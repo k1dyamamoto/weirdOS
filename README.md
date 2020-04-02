@@ -1,2 +1,8 @@
 # weirdOS
-Uhmm... Yeah... I'm making some kind of an operating system...
+
+Requirements:
+  Works with x86 CPU
+  GNU GRUB
+Install:
+  > make mykernel.bin
+  > make install
