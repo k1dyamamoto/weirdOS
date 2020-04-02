@@ -1,8 +1,10 @@
 # weirdOS
 
-Requirements:
-  Works with x86 CPU
-  GNU GRUB
-Install:
-  > make mykernel.bin
-  > make install
+### Requirements:
+  * x86 CPU
+  * GNU GRUB
+### Install:
+```
+make mykernel.bin
+make install
+```
