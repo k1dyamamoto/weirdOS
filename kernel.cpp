@@ -5,7 +5,7 @@ void print(char * str) {
 }
 
 extern "C" void kernelMain() {
-        print("Welcome to weirdOS! It doesn't do anything yet though...");
+        print("Welcome to weirdOS! It might do something soon...");
 
         while(1);
 }
