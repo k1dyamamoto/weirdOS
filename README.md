@@ -1,7 +1,7 @@
 # weirdOS
 
 ### Requirements:
-  * x86 CPU
+  * x86 32-bit CPU
   * GNU GRUB
 ### Install for linux:
 Add this to /etc/grub.d/40_custom
