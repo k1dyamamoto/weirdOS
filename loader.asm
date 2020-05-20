@@ -7,12 +7,13 @@ section .multiboot
         dd FLAGS
         dd CHECKSUM
 
-section .bss
 section .text
 	extern kernelMain
 	global loader
 
 loader:
-        mov esp, 4096
+        mov esp, kernel_stack
         call kernelMain
-
+section .bss
+resb 4 * 1024 * 1024
+kernel_stack:

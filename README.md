@@ -15,4 +15,5 @@ Then run
 ```
 make mykernel.bin
 make install
+sudo grub-mkconfig
 ```
