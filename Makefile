@@ -1,6 +1,6 @@
 ASPARAMS = -f elf32
 CPARAMS = -m32 -nostdlib -fno-builtin -fno-exceptions
-OBJECTS = loader.o kernel.o gdt.o visual.o gdt_flush.o
+OBJECTS = loader.o kernel.o gdt.o idt.o visual.o loadregs.o
 %.o: %.c
 	gcc $(CPPPARAMS) -o $@ -c $<
 %.o: %.asm
