@@ -1,5 +1,6 @@
 #define VGA_MEM (unsigned short *)0xb8000
-    
+#include "system.h"
+
 unsigned char kbdus[128] =
 {
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8',	/* 9 */
@@ -53,10 +54,34 @@ void print(char *str)
 	while (*str != '\0') {
 		if (*str == '\n')
 			video_out = VGA_MEM + 80 *  cur_line(); 
-		else
+		else if (*str == '\b')
+			*(--video_out) = *video_out | font_color | ' '; 
+		else	
 			*video_out++ = *video_out | font_color | *str;
 		str++;
 	}
+}
+
+void putc(unsigned char c)
+{
+	if (c == '\n')
+		video_out = VGA_MEM + 80 *  cur_line(); 
+	else if (c == '\b')
+			*(--video_out) = *video_out | font_color | ' ';
+	else
+		*video_out++ = *video_out | font_color | c;
+}
+
+unsigned char inportb (unsigned short _port)
+{
+	unsigned char rv;
+    	__asm__ __volatile__ ("inb %1, %0" : "=a" (rv) : "dN" (_port));
+    	return rv;
+}
+
+void outportb (unsigned short _port, unsigned char _data)
+{
+	__asm__ __volatile__ ("outb %1, %0" : : "dN" (_port), "a" (_data));
 }
 
 void set_bg_color(unsigned short color)
@@ -70,4 +95,21 @@ void change_font_color(unsigned short color)
 {
 	font_color = color / 16;
 }
+
+void keyboard_handler(struct regs *r)
+{
+	unsigned char scancode;
+    	scancode = inportb(0x60);
+    	if (scancode & 0x80) {
+	}
+    	else {
+        	putc(kbdus[scancode]);
+    	}
+}
+
+void keyboard_install()
+{
+	irq_install_handler(1, keyboard_handler);
+}
+
 
