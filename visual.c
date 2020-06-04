@@ -10,11 +10,11 @@ unsigned char kbdus[128] =
   't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',	/* Enter key */
     0,			/* 29   - Control */
   'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';',	/* 39 */
- '\'', '`',   0,		/* Left shift */
+ '\'', '`',   15,		/* Left shif */
  '\\', 'z', 'x', 'c', 'v', 'b', 'n',			/* 49 */
-  'm', ',', '.', '/',   0,				/* Right shift */
+  'm', ',', '.', '/',   15,				/* Right shift */
   '*',
-    0,	/* Alt */
+    14,	/* Alt */
   ' ',	/* Space bar */
     0,	/* Caps lock */
     0,	/* 59 - F1 key ... > */
@@ -41,8 +41,10 @@ unsigned char kbdus[128] =
     0,	/* All other keys are undefined */
 };
 unsigned short *video_out = VGA_MEM;
+unsigned short color_arr[3] = {YELLOW, RED, PURPLE};
 unsigned short font_color;
-
+unsigned char cur_color = 0;
+unsigned char shiftbit = 0;
 
 int cur_line()
 {
@@ -51,11 +53,17 @@ int cur_line()
 
 void print(char *str)
 {
+	if (video_out < VGA_MEM) {
+		video_out = VGA_MEM;
+		return;
+	}
 	while (*str != '\0') {
 		if (*str == '\n')
 			video_out = VGA_MEM + 80 *  cur_line(); 
 		else if (*str == '\b')
 			*(--video_out) = *video_out | font_color | ' '; 
+		else if (shiftbit && (*str >= 'a') && (*str <= 'z'))
+			*video_out++ = *video_out | font_color | (*str - 32);	
 		else	
 			*video_out++ = *video_out | font_color | *str;
 		str++;
@@ -64,10 +72,16 @@ void print(char *str)
 
 void putc(unsigned char c)
 {
+	if (video_out < VGA_MEM) {
+		video_out = VGA_MEM;
+		return;
+	}
 	if (c == '\n')
 		video_out = VGA_MEM + 80 *  cur_line(); 
 	else if (c == '\b')
-			*(--video_out) = *video_out | font_color | ' ';
+		*(--video_out) = *video_out | font_color | ' ';
+	else if (shiftbit && (c >= 'a') && (c <= 'z'))
+		*video_out++ = *video_out | font_color | (c - 32);	
 	else
 		*video_out++ = *video_out | font_color | c;
 }
@@ -98,12 +112,19 @@ void change_font_color(unsigned short color)
 
 void keyboard_handler(struct regs *r)
 {
-	unsigned char scancode;
+	unsigned char scancode, key;
     	scancode = inportb(0x60);
-    	if (scancode & 0x80) {
-	}
-    	else {
-        	putc(kbdus[scancode]);
+	if (scancode & 0x80) {
+		if (kbdus[scancode & 0x7F] == 15)
+			shiftbit = 0;
+	} else {
+		key = kbdus[scancode];
+		if (key == 15)
+			shiftbit = 1;
+        	else if (key == 14)
+			change_font_color(color_arr[cur_color = ((cur_color + 1) % 3)]);
+		else
+			putc(key);
     	}
 }
 
